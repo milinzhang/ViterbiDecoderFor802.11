@@ -15,3 +15,6 @@ In the trilles graph, branches between current states and previous states have a
 
 Another convinient property of these butterflies is that the output bits A and B of outter branchs are just the inverse of the inner branch. (This can not be applied in a generic case. But in 802.11 or other situations where generator polynomials have both 1s at rightmost and leftmost, it is indeed the truth.) So in our implementation, we only use a 2X32 lookup table to store all the outputs of branches.
 ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/Butterfly.png)
+
+## Forward phase
+Viterbi algorithm can be considered into two phase: we first compute path metrics in a forward view, then we pick up a path who have the maximum score (equivalently having the minimum hamming distance) to trace back and decode. In the forward phase, basically two things should be done. First compute the hamming distance between all branchs and the received bits. ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/BranchCompute.png)
