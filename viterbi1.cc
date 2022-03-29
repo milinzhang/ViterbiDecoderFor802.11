@@ -70,10 +70,18 @@ void Viterbi::add_compare_select(unsigned int *path_metric, unsigned char *branc
 
 void Viterbi::init_state (unsigned char istate) {
 
-    survivor_path[table_length][nstates] = {0};
-    branch_metric_0[nstates] = {0};
-    branch_metric_1[nstates] = {0};
-    path_metric[nstates] = {0};
+    for (int i=0; i<nstates; i++) {
+        branch_metric_0[i] = 0;
+        branch_metric_1[i] = 0;
+        path_metric[i] = 0;
+    }
+
+    for (int j=0; j<table_length; j++) {
+        for (int k=0; k<nstates; k++) {
+            survivor_path[j][k] = 0;
+        }
+    }
+    
     path_metric[istate] = 13;
 }
 /*-------------------------------- backward step -----------------------------------------------*/
@@ -97,11 +105,10 @@ void Viterbi::generate_output (unsigned char *output, unsigned char cur_state, u
     }
 }
 
-void Viterbi::trace_back (int index_of_input, unsigned char &position, unsigned char &current_state) {
+void Viterbi::trace_back (int index_of_input, unsigned char &current_state) {
 
     for (int t=0; t<traceback_depth; t++) {
-        position = (index_of_input-t)%table_length;
-        current_state = survivor_path[position][current_state];
+        current_state = survivor_path[(index_of_input-t+table_length)%table_length][current_state];
     }
 }
 /*
@@ -163,7 +170,7 @@ void Viterbi::decode (unsigned char *received_bits, unsigned char *decoded_bits,
                     unsigned int bestbranch;
                     unsigned char current_state;
                     find_max_score(bestbranch,current_state);
-                    trace_back(traceback_depth,position,current_state);
+                    trace_back(position,current_state);
                     generate_output(decoded_bits+o,current_state,position,table_length-traceback_depth);
                     o+=(table_length-traceback_depth);
                     position=(position+table_length-traceback_depth)%table_length;
