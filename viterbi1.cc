@@ -97,25 +97,12 @@ void Viterbi::generate_output (unsigned char *output, unsigned char cur_state, u
     }
 }
 
-void Viterbi::trace_back (unsigned char *output, int index_of_input) {
-
-    unsigned int bestbranch = path_metric[0];
-    unsigned char current_state, prev_state;
-    unsigned char position; // to track the position in circular table
-    for (int i=1; i<nstates; i++) {
-        if (bestbranch<path_metric[i]) {
-            bestbranch = path_metric[i];
-            current_state = i;
-        }
-    }
+void Viterbi::trace_back (int index_of_input, unsigned char &position, unsigned char &current_state) {
 
     for (int t=0; t<traceback_depth; t++) {
         position = (index_of_input-t)%table_length;
-        prev_state = survivor_path[position][current_state];
-        current_state = prev_state;
+        current_state = survivor_path[position][current_state];
     }
-
-    generate_output(output, current_state, position, table_length-traceback_depth);
 }
 /*
 void depuncture () {
@@ -148,34 +135,39 @@ void Viterbi::decode (unsigned char *received_bits, unsigned char *decoded_bits,
     else {
         int i = 0; // to track the num of processed input
         int o = 0; // to track the num of processed output
-        int position = 0; // to track the position in circular table
+        unsigned char position = 0; // to track the position in circular table
 
         while(i<ninput) {
 
             if (ninput-i<table_length-traceback_depth) { // when the rest of input can be fully stored in the circular table, decode
                 for (int t=0; t<ninput-i; t++) {
-                    branch_distance_compute(received_bits,branch_metric_0,branch_metric_1,position+t);
+                    branch_distance_compute(received_bits+i,branch_metric_0,branch_metric_1,position+t);
                     add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[position+t]);
                 }
-                position = (position+ninput-i-1)*48;
+                position = (position+ninput-i)%table_length;
                 // search for the maximum score and decode directly
-                unsigned int bestbranch = path_metric[0];
-                unsigned char current_state = 0; 
-                unsigned char prev_state;
-                for (int k=1; k<nstates; i++) {
-                    if (bestbranch<path_metric[k]) {
-                        bestbranch = path_metric[k];
-                        current_state = k;
-                    }
-                }
+                unsigned int bestbranch;
+                unsigned char current_state;
+                find_max_score(bestbranch,current_state);
                 generate_output(decoded_bits+o,current_state,position,ninput-i);
             }
 
             else {  // when the input can not fully processed by the length of circular table, process every 16 step (tablelength-tracebackdepth)
+                for (int t=0; t<table_length-traceback_depth; t++) {
+                    branch_distance_compute(received_bits+i,branch_metric_0,branch_metric_1,position+t);
+                    add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[position+t]);
+                }
 
-
-                o+=(table_length-traceback_depth);
-                position=(position+table_length-traceback_depth)%table_length;
+                if (i-table_length>=0 && (i-table_length)%(table_length-traceback_depth) == 0) {
+                    position = (position+ninput-i)%table_length;
+                    unsigned int bestbranch;
+                    unsigned char current_state;
+                    find_max_score(bestbranch,current_state);
+                    trace_back(traceback_depth,position,current_state);
+                    generate_output(decoded_bits+o,current_state,position,table_length-traceback_depth);
+                    o+=(table_length-traceback_depth);
+                    position=(position+table_length-traceback_depth)%table_length;
+                }
             }
 
             i+=(table_length-traceback_depth);
