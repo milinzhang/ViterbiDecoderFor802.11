@@ -21,7 +21,8 @@ class Viterbi {
     void init_state(unsigned char);
     void find_max_score(unsigned int &,unsigned char &);
     void generate_output(unsigned char*,unsigned char,unsigned char,int);
-    void trace_back(unsigned char*, int);
+    void trace_back(int, unsigned char &, unsigned char &);
+    void depuncture();
 
     private:
 
