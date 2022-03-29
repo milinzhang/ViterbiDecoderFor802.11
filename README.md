@@ -22,6 +22,9 @@ Viterbi algorithm can be considered into two phase: we first compute path metric
 After doing this, we should compute the cumulative path metrics and prune those branches who are less likely to achieve, which is so-called Add-Compare-Select (ACS). This is the most crucial feature of Viterbi algorithm. By ultilizing the properties of butterflies we have mentioned above, we can easily achieve this algorithm as shown in figures. ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/ACS.png)
 
 Another thing to which readers should pay attention is that the decoder should always start from the all zero state. Our way to do this is to give a initial score to state 0 which is large enough to ensure that other branchs can be pruned.
+>path_metric[initial_state] = 2*6+1
+>
+>path_metric[other_state] = 0
 
 ## Backward phase
 In the backward phase, we use a table to store indices of all previous survivor path. One of the convinient property of LSB representation is that when the input bit is 0, the corresponding state will always be even(state 2f). On the contrary, when the input bit is 1, the corresponding state is always odd (state 2f+1). this can make the decoding phase really easy
