@@ -27,10 +27,10 @@ Another thing to which readers should pay attention is that the decoder should a
 >
 >path_metric[other_state] = 0
 
-Also, in 802.11, every received sequence has at least six 0s at its tail in order to refresh the register to the all-zero state. Hence we should only take those branchs corresponding to input 0 into consideration. however, we didn't do this actually in the code since usually sequences are long enough (which means the culmulated hamming distance of the correct path is large enough) to avoid decoding errors.
+Also, in 802.11, every received sequence has at least six 0s at its tail in order to refresh the register to the all-zero state. Hence we should only take those branchs corresponding to input 0 into consideration at the last 6 steps. However, we didn't do this actually in the code since usually sequences are long enough (which means the culmulated hamming distance of the correct path is large enough) to avoid decoding errors.
 ## Backward phase
 In the backward phase, we use a circular table to store indices of all previous survivor path. One of the convinient property of LSB representation is that when the input bit is 0, the corresponding state will always be even(state 2f). On the contrary, when the input bit is 1, the corresponding state is always odd (state 2f+1). this can make the decoding phase really easy
 > output_bit = survivor_state % 2 ? 1:0;
 
-## Depunturing
-TO DO
+## Depuncturing
+In the 802.11 standard, a higher coding rate is achieved by removing some encoded bits in a certain way. To decode these data correctly, we should insert some dummy bits and these dummy bits should not be used to calculate branch metrics. This part of code will be updated in the future. ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/Depuncturing.png)
