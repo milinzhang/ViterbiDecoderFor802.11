@@ -1,5 +1,4 @@
 # include "viterbi1.h"
-# include <stdio.h>
 unsigned char Viterbi::hamming_distance(unsigned char received_bit, unsigned char encoded_bit){
     
     unsigned char res;
@@ -93,7 +92,6 @@ void Viterbi::find_max_score(unsigned char &beststate) {
             beststate = i;
         }
     }
-    printf("%d\n",bestbranch);
 }
 
 void Viterbi::generate_output (unsigned char *output, unsigned char cur_state, unsigned char &pos, int output_length) {

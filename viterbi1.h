@@ -5,6 +5,8 @@ const int nstates = 64;
 const int table_length = 48;
 const int traceback_depth = 32;
 const int decode_length = table_length - traceback_depth;
+const unsigned char branch_table[2][nstates/2] = {{0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1}, // bit 0 outter branch
+                                                  {0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1}};// bit 1 outter branch
 
 class Viterbi {
 
@@ -13,6 +15,7 @@ class Viterbi {
     Viterbi(){};
     ~Viterbi(){};
     void decode(unsigned char*,unsigned char*,int);
+    //void depuncture();
 
     protected:
 
@@ -31,8 +34,7 @@ class Viterbi {
     unsigned char branch_metric_0[nstates]; // to store hamming distance for outter branch
     unsigned char branch_metric_1[nstates]; // to store hamming distance for inner branch
     unsigned int path_metric[nstates];  // to store cumulative hamming distance for path 
-    const unsigned char branch_table[2][nstates/2] = {{0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1}, // bit 0 outter branch
-                                                    {0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1}};// bit 1 outter branch
+    
 };
 
 # endif
