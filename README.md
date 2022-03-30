@@ -17,15 +17,17 @@ Another convinient property of these butterflies is that the output bits A and B
 ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/Butterfly.png)
 
 ## Forward phase
+### compute branch metrics
 The Viterbi algorithm can be seperated into two phase: we first compute path metrics in a forward view, then we pick up a path who have the maximum score (equivalently having the minimum hamming distance) to trace back and decode. In the forward phase, basically two things should be done. First compute the hamming distance between all branchs and the received bits. ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/BranchCompute.png)
-
+### add compare select
 After doing this, we should compute the cumulative path metrics and prune those branches which are less likely to achieve, which is so-called Add-Compare-Select (ACS). This is the most crucial feature of Viterbi algorithm. By ultilizing the properties of butterflies we have mentioned above, we can easily achieve this algorithm as shown in figures. ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/ACS.png)
-
-Another thing to which readers should pay attention is that the decoder should always start from the all zero state. Our way to do this is to give a initial score to state 0 which is large enough to ensure that other branchs can be pruned.
+### initial and tailing bits
+Another thing to which readers should pay attention is that the decoder should always start from the all-zero state. Our way to do this is to give a initial score to state 0 which is large enough to ensure that other branchs can be pruned.
 >path_metric[initial_state] = 2*6+1
 >
 >path_metric[other_state] = 0
 
+Also, in 802.11, every received sequence has at least six 0s at its tail in order to refresh the register to the all-zero state. Hence we should only take those branchs corresponding to input 0 into consideration. however, we didn't do this actually in the code since usually sequences are long enough (which means the culmulated hamming distance of the correct path is large enough) to avoid decoding errors.
 ## Backward phase
 In the backward phase, we use a circular table to store indices of all previous survivor path. One of the convinient property of LSB representation is that when the input bit is 0, the corresponding state will always be even(state 2f). On the contrary, when the input bit is 1, the corresponding state is always odd (state 2f+1). this can make the decoding phase really easy
 > output_bit = survivor_state % 2 ? 1:0;
