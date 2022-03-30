@@ -127,7 +127,7 @@ void Viterbi::decode (unsigned char *received_bits, unsigned char *decoded_bits,
     unsigned char initial_state = 0;
     init_state(initial_state);
 
-    int i = 0; // to track the num of processed input
+    int i = 0; // to track the num of processed input step; note: every step we process 2 bits
     int o = 0; // to track the num of processed output
     unsigned char position = 0; // to track the position in circular table
     unsigned char current_state; // to record the best branch
@@ -142,17 +142,17 @@ void Viterbi::decode (unsigned char *received_bits, unsigned char *decoded_bits,
                 position = (position+1)%table_length;
             }
             i = num_of_decoded_bits;
-            // search for the maximum score and decode directly
             find_max_score(current_state);
-            generate_output(decoded_bits+o,current_state,position,num_of_decoded_bits-o); // need to correct
-        } else {  // when the input can not fully processed by the length of circular table, process every 16 step (tablelength-tracebackdepth)
-            for (int t=0; t<decode_length; t++) {
+            generate_output(decoded_bits+o,current_state,position,num_of_decoded_bits-o);
+
+        } else {  // when the input can not fully processed by the length of circular table, process 16 steps per time
+            for (int t=0; t<decode_length; t++) { // forward phase
                 branch_distance_compute(received_bits+i*2,branch_metric_0,branch_metric_1,t);
                 add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[position]);
                 position = (position+1)%table_length;
             }
             i+=decode_length;
-            if ((i-table_length)>=0 && (i-table_length)%(decode_length)==0) {
+            if ((i-table_length)>=0 && (i-table_length)%(decode_length)==0) { // backward phase
                 find_max_score(current_state);
                 trace_back(position,current_state);
                 generate_output(decoded_bits+o,current_state,position,decode_length);
