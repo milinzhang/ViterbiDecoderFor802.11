@@ -27,7 +27,7 @@ Another thing to which readers should pay attention is that the decoder should a
 >path_metric[other_state] = 0
 
 ## Backward phase
-In the backward phase, we use a table to store indices of all previous survivor path. One of the convinient property of LSB representation is that when the input bit is 0, the corresponding state will always be even(state 2f). On the contrary, when the input bit is 1, the corresponding state is always odd (state 2f+1). this can make the decoding phase really easy
+In the backward phase, we use a circular table to store indices of all previous survivor path. One of the convinient property of LSB representation is that when the input bit is 0, the corresponding state will always be even(state 2f). On the contrary, when the input bit is 1, the corresponding state is always odd (state 2f+1). this can make the decoding phase really easy
 > output_bit = survivor_state % 2 ? 1:0;
 
 ## Depunturing
