@@ -9,8 +9,8 @@ class Viterbi {
 
     public:
 
-    Viterbi();
-    ~Viterbi();
+    Viterbi(){};
+    ~Viterbi(){};
     void decode(unsigned char*,unsigned char*,int);
 
     protected:
@@ -20,9 +20,9 @@ class Viterbi {
     void add_compare_select(unsigned int*, unsigned char*, unsigned char*, unsigned char*);
     void init_state(unsigned char);
     void find_max_score(unsigned int &,unsigned char &);
-    void generate_output(unsigned char*,unsigned char,unsigned char,int);
-    void trace_back(int, unsigned char &, unsigned char &);
-    void depuncture();
+    void generate_output(unsigned char*,unsigned char,unsigned char&,int);
+    void trace_back(unsigned char&, unsigned char &);
+    //void depuncture();
 
     private:
 

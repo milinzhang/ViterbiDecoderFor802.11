@@ -81,7 +81,7 @@ void Viterbi::init_state (unsigned char istate) {
             survivor_path[j][k] = 0;
         }
     }
-    
+
     path_metric[istate] = 13;
 }
 /*-------------------------------- backward step -----------------------------------------------*/
@@ -97,19 +97,23 @@ void Viterbi::find_max_score(unsigned int &bestbranch, unsigned char &beststate)
     }
 }
 
-void Viterbi::generate_output (unsigned char *output, unsigned char cur_state, unsigned char pos, int decode_path_depth) {
+void Viterbi::generate_output (unsigned char *output, unsigned char cur_state, unsigned char &pos, int decode_path_depth) {
 
     for (int i=0; i<decode_path_depth; i++) {
         output[decode_path_depth-i-1] = (cur_state%2==1)?1:0;
         cur_state = survivor_path[(pos+table_length-i-1)%table_length][cur_state];
     }
+
+    pos = (pos+table_length-decode_path_depth)%table_length; // update the position in circular table
 }
 
-void Viterbi::trace_back (int index_of_input, unsigned char &current_state) {
+void Viterbi::trace_back (unsigned char &pos, unsigned char &current_state) {
 
     for (int t=0; t<traceback_depth; t++) {
-        current_state = survivor_path[(index_of_input-t+table_length)%table_length][current_state];
+        current_state = survivor_path[(pos-t-1+table_length)%table_length][current_state];
     }
+
+    pos = (pos+table_length-traceback_depth)%table_length;
 }
 /*
 void depuncture () {
@@ -124,60 +128,40 @@ void Viterbi::decode (unsigned char *received_bits, unsigned char *decoded_bits,
     unsigned char initial_state = 0;
     init_state(initial_state);
 
-    // when the length of input is less than the table length, we can store all results in table and decode directly
-    if (ninput <= table_length) {
-        // forward phase
-        for (int t=0; t<ninput; t++) {
-            branch_distance_compute(received_bits,branch_metric_0,branch_metric_1,t);
-            add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[t]);
-        }
-        // search for the maximum score
-        unsigned int bestbranch;
-        unsigned char current_state;
-        find_max_score(bestbranch,current_state);
-        // decode
-        generate_output(decoded_bits,current_state,ninput,ninput);
-    }
-    // when the num of input is larger than the table length, loop
-    else {
-        int i = 0; // to track the num of processed input
-        int o = 0; // to track the num of processed output
-        unsigned char position = 0; // to track the position in circular table
+    int i = 0; // to track the num of processed input
+    int o = 0; // to track the num of processed output
+    unsigned char position = 0; // to track the position in circular table
 
-        while(i<ninput) {
+    unsigned int bestbranch; // to record the best branch
+    unsigned char current_state; 
 
-            if (ninput-i<table_length-traceback_depth) { // when the rest of input can be fully stored in the circular table, decode
-                for (int t=0; t<ninput-i; t++) {
-                    branch_distance_compute(received_bits+i,branch_metric_0,branch_metric_1,position+t);
-                    add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[position+t]);
-                }
-                position = (position+ninput-i)%table_length;
-                // search for the maximum score and decode directly
-                unsigned int bestbranch;
-                unsigned char current_state;
+
+    while(i<ninput) {
+
+        if (ninput-i<table_length-traceback_depth) { // when the rest of input can be fully stored in the circular table, decode
+            for (int t=0; t<ninput-i; t++) {
+                branch_distance_compute(received_bits+i,branch_metric_0,branch_metric_1,position+t);
+                add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[position+t]);
+            }
+            // update position
+            position = (position+ninput-i)%table_length;
+            // search for the maximum score and decode directly
+            find_max_score(bestbranch,current_state);
+            generate_output(decoded_bits+o,current_state,position,ninput-i);
+        } else {  // when the input can not fully processed by the length of circular table, process every 16 step (tablelength-tracebackdepth)
+            for (int t=0; t<table_length-traceback_depth; t++) {
+                branch_distance_compute(received_bits+i,branch_metric_0,branch_metric_1,position+t);
+                add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[position+t]);
+            }
+            position = (position+table_length-traceback_depth)%table_length;
+            if (i-table_length>=0 && (i-table_length)%(table_length-traceback_depth) == 0) {
                 find_max_score(bestbranch,current_state);
-                generate_output(decoded_bits+o,current_state,position,ninput-i);
+                trace_back(position,current_state);
+                generate_output(decoded_bits+o,current_state,position,table_length-traceback_depth);
+                o+=(table_length-traceback_depth);
             }
-
-            else {  // when the input can not fully processed by the length of circular table, process every 16 step (tablelength-tracebackdepth)
-                for (int t=0; t<table_length-traceback_depth; t++) {
-                    branch_distance_compute(received_bits+i,branch_metric_0,branch_metric_1,position+t);
-                    add_compare_select(path_metric,branch_metric_0,branch_metric_1,survivor_path[position+t]);
-                }
-
-                if (i-table_length>=0 && (i-table_length)%(table_length-traceback_depth) == 0) {
-                    position = (position+ninput-i)%table_length;
-                    unsigned int bestbranch;
-                    unsigned char current_state;
-                    find_max_score(bestbranch,current_state);
-                    trace_back(position,current_state);
-                    generate_output(decoded_bits+o,current_state,position,table_length-traceback_depth);
-                    o+=(table_length-traceback_depth);
-                    position=(position+table_length-traceback_depth)%table_length;
-                }
-            }
-
-            i+=(table_length-traceback_depth);
         }
+
+        i+=(table_length-traceback_depth);
     }
 }
