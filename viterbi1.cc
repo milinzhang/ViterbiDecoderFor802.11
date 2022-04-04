@@ -21,7 +21,6 @@
  */
 
 # include "viterbi1.h"
-# include <stdio.h>
 
 unsigned char Viterbi::hamming_distance(unsigned char received_bit, unsigned char encoded_bit){
     
