@@ -33,4 +33,12 @@ In the backward phase, we use a circular table to store indices of all previous 
 > output_bit = survivor_state % 2 ? 1:0;
 
 ## Depuncturing
-In the 802.11 standard, a higher coding rate is achieved by removing some encoded bits in a certain way. To decode these data correctly, we should insert some dummy bits and these dummy bits should not be used to calculate branch metrics. This part of code will be updated in the future. ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/Depuncturing.png)
+In the 802.11 standard, a higher coding rate is achieved by removing some encoded bits in a certain way. To decode these data correctly, we should insert some dummy bits and these dummy bits should not be used to calculate branch metrics. ![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/Depuncturing.png)
+
+By inspecting the puncturing pattern, we can easily observe that at a 2/3 rate, after copying every 3 binary bits (0 or 1), we should insert a dummy bit (2). 
+
+![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/depuncture2_3.png)
+
+Similarly, for 3/4 rate encoded data, we have 
+
+![Alt pic](https://github.com/milinzhang/ViterbiDecoderFor802.11/blob/main/fig/depuncture3_4.png)
