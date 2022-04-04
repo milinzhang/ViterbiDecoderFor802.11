@@ -136,7 +136,7 @@ void Viterbi::trace_back (unsigned char &pos, unsigned char &current_state) {
 
     pos = (pos+decode_length)%table_length;
 }
-
+/*-------------------------- depuncturation ----------------------------------*/
 void Viterbi::depuncture (unsigned char *input, unsigned char *output, modulation pattern, int ninput) {
 
     int noutput=ninput;
@@ -165,7 +165,7 @@ void Viterbi::depuncture (unsigned char *input, unsigned char *output, modulatio
         noutput = ninput*3/2;
         for (int i=0; i<noutput; i++) {
             if (i%6 == 3 || i%6 ==4) {
-                output[i] = 0;
+                output[i] = 2;
             } else {
                 output[i] = input[i - (i+1)/6*2];
             }
