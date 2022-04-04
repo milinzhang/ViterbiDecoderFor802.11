@@ -21,6 +21,8 @@
  */
 
 # include "viterbi1.h"
+# include <stdio.h>
+
 unsigned char Viterbi::hamming_distance(unsigned char received_bit, unsigned char encoded_bit){
     
     unsigned char res;
@@ -134,10 +136,43 @@ void Viterbi::trace_back (unsigned char &pos, unsigned char &current_state) {
 
     pos = (pos+decode_length)%table_length;
 }
-/*
-void depuncture () {
 
-}*/
+void Viterbi::depuncture (unsigned char *input, unsigned char *output, modulation pattern, int ninput) {
+
+    int noutput=ninput;
+
+    switch (pattern)
+    {
+    case BPSK_1_2:
+    case QPSK_1_2:
+    case QAM16_1_2:
+        for (int i=0; i<noutput; i++) {
+            output[i]=input[i];
+        }
+        break;
+    case QAM64_2_3:
+        noutput = ninput*4/3;
+        for (int i=0; i<noutput; i++) {
+            if (i%4==3) {
+                output[i] = 2;
+            } else {
+                output[i] = input[i - i/4];
+            }
+        }
+        break;
+    case QAM16_3_4:
+    case QAM64_3_4:
+        noutput = ninput*3/2;
+        for (int i=0; i<noutput; i++) {
+            if (i%6 == 3 || i%6 ==4) {
+                output[i] = 0;
+            } else {
+                output[i] = input[i - (i+1)/6*2];
+            }
+        }
+        break;
+    }
+}
 
 /*--------------------------- viterbi decoder ---------------------------------*/
 

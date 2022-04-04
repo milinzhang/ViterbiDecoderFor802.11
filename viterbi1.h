@@ -29,6 +29,13 @@ const int decode_length = table_length - traceback_depth;
 const unsigned char branch_table[2][nstates/2] = {{0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1}, // bit 0 outter branch
                                                   {0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1}};// bit 1 outter branch
 
+enum modulation {
+    BPSK_1_2 = 0, BPSK_3_4 = 1,
+    QPSK_1_2 = 2, QPSK_3_4 = 3,
+    QAM16_1_2 = 4, QAM16_3_4 = 5,
+    QAM64_2_3 = 6, QAM64_3_4 = 7,
+};
+
 class Viterbi {
 
     public:
@@ -36,7 +43,7 @@ class Viterbi {
     Viterbi(){};
     ~Viterbi(){};
     void decode(unsigned char*,unsigned char*,int);
-    //void depuncture();
+    void depuncture(unsigned char*, unsigned char*, modulation, int);
 
     protected:
 
